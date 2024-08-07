@@ -1,2 +1,6 @@
 venv
 .env
+
+# Python specific
+__pycache__/
+.pyc
