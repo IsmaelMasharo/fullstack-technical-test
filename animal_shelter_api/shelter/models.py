@@ -24,7 +24,7 @@ class Animal(models.Model):
     ]
     STATUS_CHOICES = [
         ("adopted", "Adoptado"),
-        ("pending_adoption", "En Adopción"),
+        ("pending_adoption", "En Proceso"),
         ("awaiting_adoption", "En Espera"),
     ]
     created_at = models.DateTimeField("Created at", auto_now_add=True)
@@ -40,14 +40,18 @@ class Animal(models.Model):
 
 class Adoption(models.Model):
     STATUS_CHOICES = [
-        ("completed_adoption", "Finalizado"),
+        ("adopted", "Adoptado"),
         ("pending_adoption", "En Proceso"),
     ]
     created_at = models.DateTimeField("Created at", auto_now_add=True)
-    adopted_at = models.DateTimeField("Adopted at")
+    updated_at = models.DateTimeField("Updated at", auto_now=True)
     animal = models.ForeignKey(Animal, on_delete=models.CASCADE)
     volunteer = models.ForeignKey(
-        CustomUser, on_delete=models.CASCADE, related_name="volunteer_adoptions"
+        CustomUser,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="volunteer_adoptions",
     )
     adopter = models.ForeignKey(
         CustomUser, on_delete=models.CASCADE, related_name="adopter_adoptions"
