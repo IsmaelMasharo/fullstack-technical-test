@@ -31,7 +31,7 @@ const AdoptionPage = () => {
     fetchAdoptions()
   }, [])
 
-  const handleStatusChange = (adoptionId, newStatus) => {
+  const handleStatusChange = (adoptionId: number, newStatus) => {
     setAdoptions((prevAdoptions) =>
       prevAdoptions.map((adoption) =>
         adoption.id === adoptionId
@@ -41,14 +41,11 @@ const AdoptionPage = () => {
     )
   }
 
-  const handleUpdate = async (adoptionId, currentStatus) => {
+  const handleUpdate = async (adoptionId: number, currentStatus) => {
     try {
-      const response = await axiosPrivate.post(
-        `/api/adoptions/${adoptionId}/change_status/`,
-        {
-          status: currentStatus,
-        }
-      )
+      await axiosPrivate.post(`/api/adoptions/${adoptionId}/change_status/`, {
+        status: currentStatus,
+      })
     } catch (err) {
       alert("Failed to update status.")
     }

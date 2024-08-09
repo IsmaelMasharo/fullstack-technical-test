@@ -1,9 +1,27 @@
-import { createContext, useState } from "react"
+import { createContext, useState, ReactNode } from "react"
 
-const AuthContext = createContext({})
+export type Role = "admin" | "volunteer" | "adopter"
 
-export const AuthProvider = ({ children }) => {
-  const [auth, setAuth] = useState({})
+export type AccessTokensType = {
+  accessToken?: string
+  role?: Role
+}
+
+export interface CurrentUserContextType {
+  auth: AccessTokensType
+  setAuth: React.Dispatch<React.SetStateAction<AccessTokensType>>
+}
+
+interface Props {
+  children: ReactNode
+}
+
+const AuthContext = createContext<CurrentUserContextType>(
+  {} as CurrentUserContextType
+)
+
+export const AuthProvider: React.FC<Props> = ({ children }) => {
+  const [auth, setAuth] = useState<AccessTokensType>({})
 
   return (
     <AuthContext.Provider value={{ auth, setAuth }}>

@@ -9,8 +9,18 @@ import {
   Card,
   Alert,
 } from "@mantine/core"
+import { isAxiosError } from "axios"
 import useAxiosPrivate from "../hooks/useAxiosPrivate"
 import useAuth from "../hooks/useAuth"
+
+interface Animal {
+  id: number
+  name: string
+  age: number
+  breed: boolean
+  type: string
+  status: string
+}
 
 // ListAnimals Component
 const ListAnimals = () => {
@@ -19,9 +29,9 @@ const ListAnimals = () => {
     auth: { role },
   } = useAuth()
 
-  const [animals, setAnimals] = useState([])
+  const [animals, setAnimals] = useState<Animal[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<null | string>(null)
 
   const fetchAnimals = async () => {
     try {
@@ -41,12 +51,14 @@ const ListAnimals = () => {
     fetchAnimals()
   }, [])
 
-  const handleRequestAdoption = async (animalId) => {
+  const handleRequestAdoption = async (animalId: number) => {
     try {
       await axiosPrivate.post(`/api/animals/${animalId}/request_adoption/`)
       fetchAnimals()
     } catch (err) {
-      alert(err.response.data.detail)
+      if (isAxiosError(err)) {
+        alert(err.response?.data.detail)
+      }
     }
   }
 
@@ -65,17 +77,14 @@ const ListAnimals = () => {
       >
         Animals Available for Adoption
       </Title>
-      <Group
-        direction="column"
-        spacing="md"
-      >
+      <Group>
         {animals.map((animal) => (
           <Card
             key={animal.id}
             shadow="sm"
             padding="lg"
           >
-            <Text weight={500}>{animal.name}</Text>
+            <Text>{animal.name}</Text>
             <Text>Age: {animal.age}</Text>
             <Text>Breed: {animal.breed}</Text>
             <Text>Type: {animal.type}</Text>

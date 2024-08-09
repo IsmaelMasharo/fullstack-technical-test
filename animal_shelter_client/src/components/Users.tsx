@@ -1,18 +1,29 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, FC } from "react"
 import { Paper, Title, Group, Loader, Card, Alert } from "@mantine/core"
 import useAxiosPrivate from "../hooks/useAxiosPrivate"
+import { Role } from "../context/AuthProvider"
 
-const AdoptersPage = ({ userType }) => {
+interface User {
+  id: number
+  username: string
+  email: string
+  first_name: string
+  last_name: string
+  user_type: string
+  status: string
+}
+
+const AdoptersPage: FC<{ role: Role }> = ({ role }) => {
   const axiosPrivate = useAxiosPrivate()
-  const [adopters, setAdopters] = useState([])
+  const [adopters, setAdopters] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<null | string>(null)
 
   useEffect(() => {
     const fetchAdopters = async () => {
       try {
         const endpoint =
-          userType === "adopter" ? "/api/adopters/" : "/api/volunteers/"
+          role === "adopter" ? "/api/adopters/" : "/api/volunteers/"
         const response = await axiosPrivate.get(endpoint)
         setAdopters(response.data)
       } catch (err) {
@@ -23,7 +34,7 @@ const AdoptersPage = ({ userType }) => {
     }
 
     fetchAdopters()
-  }, [userType])
+  }, [role])
 
   if (loading) return <Loader size="lg" />
   if (error) return <Alert color="red">{error}</Alert>
@@ -38,12 +49,9 @@ const AdoptersPage = ({ userType }) => {
         order={2}
         mb="md"
       >
-        List of {userType === "adopter" ? "Adopters" : "Volunteers"}
+        List of {role === "adopter" ? "Adopters" : "Volunteers"}
       </Title>
-      <Group
-        direction="column"
-        spacing="md"
-      >
+      <Group>
         {adopters.map((adopter) => (
           <Card
             key={adopter.id}

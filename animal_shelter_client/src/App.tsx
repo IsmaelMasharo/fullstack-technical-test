@@ -11,7 +11,6 @@ import Header from "./components/Header"
 import RequireAuth from "./components/RequireAuth"
 import Unauthorized from "./components/Unauthorized"
 import Missing from "./components/Missing"
-import { ROLES } from "./helpers/constants"
 
 function Layout() {
   return (
@@ -44,9 +43,7 @@ export default function App() {
         >
           <Route
             element={
-              <RequireAuth
-                allowedRoles={[ROLES.Admin, ROLES.Volunteer, ROLES.Adopter]}
-              />
+              <RequireAuth allowedRoles={["admin", "adopter", "volunteer"]} />
             }
           >
             <Route
@@ -56,9 +53,7 @@ export default function App() {
           </Route>
 
           <Route
-            element={
-              <RequireAuth allowedRoles={[ROLES.Admin, ROLES.Volunteer]} />
-            }
+            element={<RequireAuth allowedRoles={["admin", "volunteer"]} />}
           >
             <Route
               path="/adoptions"
@@ -66,14 +61,14 @@ export default function App() {
             />
             <Route
               path="/adopters"
-              element={<Users userType="adopter" />}
+              element={<Users role="adopter" />}
             />
           </Route>
 
-          <Route element={<RequireAuth allowedRoles={[ROLES.Admin]} />}>
+          <Route element={<RequireAuth allowedRoles={["admin"]} />}>
             <Route
               path="/volunteers"
-              element={<Users userType="volunteer" />}
+              element={<Users role="volunteer" />}
             />
           </Route>
 

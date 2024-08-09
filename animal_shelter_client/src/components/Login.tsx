@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { isAxiosError } from "axios"
 import { useForm } from "@mantine/form"
 import { Link, useNavigate } from "react-router-dom"
 import {
@@ -14,13 +15,18 @@ import {
 import useAuth from "../hooks/useAuth"
 import axios from "../api/axios"
 
+interface FormValues {
+  username: string
+  password: string
+}
+
 const LoginForm = () => {
   const { setAuth } = useAuth()
   const [error, setError] = useState(null)
 
   const navigate = useNavigate()
 
-  const form = useForm({
+  const form = useForm<FormValues>({
     initialValues: {
       username: "",
       password: "",
@@ -32,7 +38,7 @@ const LoginForm = () => {
     },
   })
 
-  const handleSubmit = async (values) => {
+  const handleSubmit = async (values: FormValues) => {
     const payload = {
       username: values.username,
       password: values.password,
@@ -46,7 +52,9 @@ const LoginForm = () => {
       setAuth({ accessToken: access, role: user_type })
       navigate("/animals/")
     } catch (error) {
-      setError(error.response.data.detail)
+      if (isAxiosError(error)) {
+        setError(error.response?.data.detail)
+      }
     }
   }
 

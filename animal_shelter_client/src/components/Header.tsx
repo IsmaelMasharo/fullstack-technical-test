@@ -27,7 +27,7 @@ const Header = () => {
         >
           Adoptions
         </Anchor>
-        {[ROLES.Admin, ROLES.Volunteer].includes(role) && (
+        {role && [ROLES.Admin, ROLES.Volunteer].includes(role) && (
           <Anchor
             component="button"
             onClick={() => navigate("/adopters")}

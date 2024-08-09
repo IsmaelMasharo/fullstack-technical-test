@@ -12,13 +12,24 @@ import {
   Group,
   Anchor,
 } from "@mantine/core"
+import { isAxiosError } from "axios"
 import axios from "../api/axios"
+
+interface FormValues {
+  username: string
+  email: string
+  firstName: string
+  lastName: string
+  password: string
+  confirmPassword: string
+  userType: string
+}
 
 const RegistrationForm = () => {
   const [error, setError] = useState(null)
   const navigate = useNavigate()
 
-  const form = useForm({
+  const form = useForm<FormValues>({
     initialValues: {
       username: "",
       email: "",
@@ -43,7 +54,7 @@ const RegistrationForm = () => {
     },
   })
 
-  const handleSubmit = async (values) => {
+  const handleSubmit = async (values: FormValues) => {
     const payload = {
       username: values.username,
       email: values.email,
@@ -57,10 +68,8 @@ const RegistrationForm = () => {
       await axios.post("/api/register/", payload)
       navigate("/login")
     } catch (error) {
-      if (error.response && error.response.status === 400) {
-        setError("Email is already in use.")
-      } else {
-        setError("An error occurred during registration.")
+      if (isAxiosError(error)) {
+        setError(error.response?.data.detail)
       }
     }
   }
