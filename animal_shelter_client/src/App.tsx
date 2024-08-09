@@ -11,6 +11,7 @@ import Header from "./components/Header"
 import RequireAuth from "./components/RequireAuth"
 import Unauthorized from "./components/Unauthorized"
 import Missing from "./components/Missing"
+import PersistLogin from "./components/PersistLogin"
 
 function Layout() {
   return (
@@ -37,46 +38,48 @@ export default function App() {
           path="unauthorized"
           element={<Unauthorized />}
         />
-        <Route
-          path="/"
-          element={<Layout />}
-        >
+
+        <Route element={<PersistLogin />}>
           <Route
-            element={
-              <RequireAuth allowedRoles={["admin", "adopter", "volunteer"]} />
-            }
+            path="/"
+            element={<Layout />}
           >
             <Route
-              path="/animals"
-              element={<Animals />}
-            />
-          </Route>
+              element={
+                <RequireAuth allowedRoles={["admin", "adopter", "volunteer"]} />
+              }
+            >
+              <Route
+                path="/animals"
+                element={<Animals />}
+              />
+            </Route>
 
-          <Route
-            element={<RequireAuth allowedRoles={["admin", "volunteer"]} />}
-          >
             <Route
-              path="/adoptions"
-              element={<Adoption />}
-            />
-            <Route
-              path="/adopters"
-              element={<Users role="adopter" />}
-            />
-          </Route>
+              element={<RequireAuth allowedRoles={["admin", "volunteer"]} />}
+            >
+              <Route
+                path="/adoptions"
+                element={<Adoption />}
+              />
+              <Route
+                path="/adopters"
+                element={<Users role="adopter" />}
+              />
+            </Route>
 
-          <Route element={<RequireAuth allowedRoles={["admin"]} />}>
-            <Route
-              path="/volunteers"
-              element={<Users role="volunteer" />}
-            />
+            <Route element={<RequireAuth allowedRoles={["admin"]} />}>
+              <Route
+                path="/volunteers"
+                element={<Users role="volunteer" />}
+              />
+            </Route>
           </Route>
-
-          <Route
-            path="*"
-            element={<Missing />}
-          />
         </Route>
+        <Route
+          path="*"
+          element={<Missing />}
+        />
       </Routes>
     </MantineProvider>
   )
