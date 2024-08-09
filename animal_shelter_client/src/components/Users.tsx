@@ -1,5 +1,5 @@
 import { useState, useEffect, FC } from "react"
-import { Paper, Title, Group, Loader, Card, Alert } from "@mantine/core"
+import { Paper, Title, TextInput, Loader, Card, Alert } from "@mantine/core"
 import useAxiosPrivate from "../hooks/useAxiosPrivate"
 import { Role } from "../context/AuthProvider"
 
@@ -40,32 +40,44 @@ const AdoptersPage: FC<{ role: Role }> = ({ role }) => {
   if (error) return <Alert color="red">{error}</Alert>
 
   return (
-    <Paper
-      radius="md"
-      p="xl"
-      withBorder
-    >
-      <Title
-        order={2}
-        mb="md"
-      >
-        List of {role === "adopter" ? "Adopters" : "Volunteers"}
+    <Paper p="sm">
+      <Title order={2} mb="md">
+        {role === "adopter" ? "Adopters" : "Volunteers"}
       </Title>
-      <Group>
-        {adopters.map((adopter) => (
-          <Card
-            key={adopter.id}
-            shadow="sm"
-            padding="lg"
-          >
-            <Title order={3}>{adopter.username}</Title>
-            <p>First Name: {adopter.first_name}</p>
-            <p>Last Name: {adopter.last_name}</p>
-            <p>Email: {adopter.email}</p>
-            <p>Status: {adopter.status}</p>
-          </Card>
-        ))}
-      </Group>
+      {adopters.map((adopter) => (
+        <Card key={adopter.id} withBorder shadow="sm" px="xl" mb="md">
+          <TextInput
+            label="Username"
+            value={adopter.username}
+            mb="sm"
+            disabled={true}
+          />
+          <TextInput
+            label="First Name"
+            value={adopter.first_name}
+            mb="sm"
+            disabled={true}
+          />
+          <TextInput
+            label="Last Name"
+            value={adopter.last_name}
+            mb="sm"
+            disabled={true}
+          />
+          <TextInput
+            label="Email"
+            value={adopter.email}
+            mb="sm"
+            disabled={true}
+          />
+          <TextInput
+            label="Status"
+            value={adopter.status}
+            mb="sm"
+            disabled={true}
+          />
+        </Card>
+      ))}
     </Paper>
   )
 }

@@ -3,8 +3,7 @@ import {
   Paper,
   Title,
   Button,
-  Text,
-  Group,
+  TextInput,
   Loader,
   Card,
   Alert,
@@ -17,7 +16,7 @@ interface Animal {
   id: number
   name: string
   age: number
-  breed: boolean
+  breed: string
   type: string
   status: string
 }
@@ -66,37 +65,28 @@ const ListAnimals = () => {
   if (error) return <Alert color="red">{error}</Alert>
 
   return (
-    <Paper
-      radius="md"
-      p="xl"
-      withBorder
-    >
-      <Title
-        order={2}
-        mb="md"
-      >
-        Animals Available for Adoption
+    <Paper p="sm">
+      <Title order={2} mb="md">
+        Animals
       </Title>
-      <Group>
-        {animals.map((animal) => (
-          <Card
-            key={animal.id}
-            shadow="sm"
-            padding="lg"
-          >
-            <Text>{animal.name}</Text>
-            <Text>Age: {animal.age}</Text>
-            <Text>Breed: {animal.breed}</Text>
-            <Text>Type: {animal.type}</Text>
-            <Button
-              mt="md"
-              onClick={() => handleRequestAdoption(animal.id)}
-            >
+      {animals.map((animal) => (
+        <Card key={animal.id} withBorder shadow="sm" px="xl" mb="md">
+          <TextInput label="Name" value={animal.name} mb="sm" disabled={true} />
+          <TextInput label="Age" value={animal.age} mb="sm" disabled={true} />
+          <TextInput
+            label="Breed"
+            value={animal.breed}
+            mb="sm"
+            disabled={true}
+          />
+          <TextInput label="Type" value={animal.type} mb="sm" disabled={true} />
+          {role === "adopter" && (
+            <Button mt="md" onClick={() => handleRequestAdoption(animal.id)}>
               Adopt
             </Button>
-          </Card>
-        ))}
-      </Group>
+          )}
+        </Card>
+      ))}
     </Paper>
   )
 }

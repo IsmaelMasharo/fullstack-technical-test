@@ -6,11 +6,11 @@ import {
   TextInput,
   PasswordInput,
   Paper,
-  Group,
   Button,
   Title,
   Text,
   Alert,
+  Container,
 } from "@mantine/core"
 import useAuth from "../hooks/useAuth"
 import axios from "../api/axios"
@@ -59,64 +59,39 @@ const LoginForm = () => {
   }
 
   return (
-    <Paper
-      radius="md"
-      p="xl"
-      withBorder
-    >
-      <Title
-        order={2}
-        mt="md"
-        mb={50}
-      >
+    <Container size={420} my={40}>
+      <Title order={2} ta="center">
         Login
       </Title>
-
+      <Text c="dimmed" size="sm" ta="center" mt={5}>
+        Do not have an account yet? <Link to="/register">Create one</Link>
+      </Text>
+      <Paper withBorder shadow="md" p={30} mt={30} radius="md">
+        <form onSubmit={form.onSubmit(handleSubmit)}>
+          <TextInput
+            label="Username"
+            placeholder="Your username"
+            required
+            {...form.getInputProps("username")}
+          />
+          <PasswordInput
+            label="Password"
+            placeholder="Your password"
+            required
+            mt="md"
+            {...form.getInputProps("password")}
+          />
+          <Button fullWidth mt="xl" type="submit">
+            Login
+          </Button>
+        </form>
+      </Paper>
       {error && (
-        <Alert
-          color="red"
-          mb="md"
-        >
+        <Alert color="red" my="lg">
           {error}
         </Alert>
       )}
-
-      <form onSubmit={form.onSubmit(handleSubmit)}>
-        <TextInput
-          label="Username"
-          placeholder="Your username"
-          required
-          {...form.getInputProps("username")}
-        />
-
-        <PasswordInput
-          label="Password"
-          placeholder="Your password"
-          required
-          mt="md"
-          {...form.getInputProps("password")}
-        />
-
-        <Group mt="md">
-          <Text size="sm">Forgot password?</Text>
-        </Group>
-
-        <Button
-          fullWidth
-          mt="xl"
-          type="submit"
-        >
-          Login
-        </Button>
-      </form>
-      <Group mt="md">
-        Need an Account?
-        <br />
-        <span className="line">
-          <Link to="/register">Sign Up</Link>
-        </span>
-      </Group>
-    </Paper>
+    </Container>
   )
 }
 

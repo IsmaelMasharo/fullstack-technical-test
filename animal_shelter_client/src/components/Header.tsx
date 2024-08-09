@@ -2,6 +2,7 @@ import { Group, Anchor, Container } from "@mantine/core"
 import { useNavigate } from "react-router-dom"
 import useAuth from "../hooks/useAuth"
 import { ROLES } from "../helpers/constants"
+import classes from "../styles/Header.module.css"
 
 // ListAnimals Component
 const Header = () => {
@@ -11,42 +12,48 @@ const Header = () => {
   const navigate = useNavigate()
 
   return (
-    <Container>
-      <Group>
-        <Anchor
-          component="button"
-          onClick={() => navigate("/animals")}
-          size="lg"
-        >
-          Animals
-        </Anchor>
-        <Anchor
-          component="button"
-          onClick={() => navigate("/adoptions")}
-          size="lg"
-        >
-          Adoptions
-        </Anchor>
-        {role && [ROLES.Admin, ROLES.Volunteer].includes(role) && (
+    <header className={classes.header}>
+      <Container className={classes.inner}>
+        <Group>
           <Anchor
             component="button"
-            onClick={() => navigate("/adopters")}
+            onClick={() => navigate("/animals")}
             size="lg"
+            className={classes.link}
           >
-            Adopters
+            Animals
           </Anchor>
-        )}
-        {role === ROLES.Admin && (
           <Anchor
             component="button"
-            onClick={() => navigate("/volunteers")}
+            onClick={() => navigate("/adoptions")}
             size="lg"
+            className={classes.link}
           >
-            Volunteers
+            Adoptions
           </Anchor>
-        )}
-      </Group>
-    </Container>
+          {role && [ROLES.Admin, ROLES.Volunteer].includes(role) && (
+            <Anchor
+              component="button"
+              onClick={() => navigate("/adopters")}
+              size="lg"
+              className={classes.link}
+            >
+              Adopters
+            </Anchor>
+          )}
+          {role === ROLES.Admin && (
+            <Anchor
+              component="button"
+              onClick={() => navigate("/volunteers")}
+              size="lg"
+              className={classes.link}
+            >
+              Volunteers
+            </Anchor>
+          )}
+        </Group>
+      </Container>
+    </header>
   )
 }
 

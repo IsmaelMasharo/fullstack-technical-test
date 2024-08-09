@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom"
 import { useState, useEffect } from "react"
+import { Loader } from "@mantine/core"
 import useRefreshToken from "../hooks/useRefreshToken"
 import useAuth from "../hooks/useAuth"
 
@@ -29,7 +30,7 @@ const PersistLogin = () => {
     }
   }, [])
 
-  return isLoading ? <p>Loading...</p> : <Outlet />
+  return isLoading ? <Loader /> : <Outlet />
 }
 
 export default PersistLogin

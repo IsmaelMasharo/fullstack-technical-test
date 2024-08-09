@@ -7,9 +7,11 @@ import {
   Card,
   Alert,
   Select,
+  TextInput,
 } from "@mantine/core"
 import { isAxiosError } from "axios"
 import useAxiosPrivate from "../hooks/useAxiosPrivate"
+import useAuth from "../hooks/useAuth"
 
 type AdoptionStatus = "pending_adoption" | "adopted"
 
@@ -26,12 +28,14 @@ const AdoptionPage = () => {
   const [adoptions, setAdoptions] = useState<Adoption[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const { auth } = useAuth()
 
   useEffect(() => {
     const fetchAdoptions = async () => {
       try {
         const response = await axiosPrivate.get("/api/adoptions/")
         setAdoptions(response.data)
+        console.log(response.data)
       } catch (err) {
         if (isAxiosError(err)) {
           setError(err.response?.data.detail)
@@ -66,29 +70,27 @@ const AdoptionPage = () => {
   if (error) return <Alert color="red">{error}</Alert>
 
   return (
-    <Paper
-      radius="md"
-      p="xl"
-      withBorder
-    >
-      <Title
-        order={2}
-        mb="md"
-      >
+    <Paper p="sm">
+      <Title order={2} mb="md">
         Adoptions
       </Title>
 
       {adoptions.map((adoption) => (
-        <Card
-          key={adoption.id}
-          shadow="sm"
-          padding="lg"
-        >
-          <p>Animal: {adoption.animal}</p>
-          <p>Adopter: {adoption.adopter}</p>
-          <p>Volunteer: {adoption.volunteer}</p>
+        <Card key={adoption.id} withBorder shadow="sm" px="xl" mb="md">
+          <TextInput
+            label="Animal"
+            value={adoption.animal}
+            mb="sm"
+            disabled={true}
+          />
+          <TextInput
+            label="Adopter"
+            value={adoption.adopter}
+            mb="sm"
+            disabled={true}
+          />
           <Select
-            label="State"
+            label="Status"
             value={adoption.status}
             onChange={(status) =>
               handleStatusChange(adoption.id, status as AdoptionStatus)
