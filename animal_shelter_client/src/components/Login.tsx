@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useForm } from "@mantine/form"
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import {
   TextInput,
   PasswordInput,
@@ -8,13 +8,15 @@ import {
   Group,
   Button,
   Title,
-  Text,Anchor, Alert
+  Text,
+  Alert,
 } from "@mantine/core"
-import { login } from "../api/shelter.api"
-
+import useAuth from "../hooks/useAuth"
+import axios from "../api/axios"
 
 const LoginForm = () => {
-    const [error, setError] = useState(null)
+  const { setAuth } = useAuth()
+  const [error, setError] = useState(null)
 
   const navigate = useNavigate()
 
@@ -37,15 +39,16 @@ const LoginForm = () => {
     }
 
     try {
-      const response = await login(payload)
-      const { access } = response.data;
-      localStorage.setItem('token', access);
-      navigate('/animals');
+      const response = await axios.post("/api/auth/token/", payload, {
+        withCredentials: true,
+      })
+      const { access, user_type } = response?.data
+      setAuth({ accessToken: access, role: user_type })
+      navigate("/animals/")
     } catch (error) {
-        setError(error.response.data.detail)
+      setError(error.response.data.detail)
     }
   }
-
 
   return (
     <Paper
@@ -98,10 +101,12 @@ const LoginForm = () => {
           Login
         </Button>
       </form>
-      <Group  mt="md">
-        <Anchor component="button" onClick={() => navigate('/register')}>
-          Don't have an account yet? Create one
-        </Anchor>
+      <Group mt="md">
+        Need an Account?
+        <br />
+        <span className="line">
+          <Link to="/register">Sign Up</Link>
+        </span>
       </Group>
     </Paper>
   )

@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react"
 import { Paper, Title, Group, Loader, Card, Alert } from "@mantine/core"
-import { getAdopters, getVolunteers } from "../api/shelter.api"
+import useAxiosPrivate from "../hooks/useAxiosPrivate"
 
 const AdoptersPage = ({ userType }) => {
+  const axiosPrivate = useAxiosPrivate()
   const [adopters, setAdopters] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -10,10 +11,9 @@ const AdoptersPage = ({ userType }) => {
   useEffect(() => {
     const fetchAdopters = async () => {
       try {
-        console.log({ userType })
-        const request = userType === "adopter" ? getAdopters : getVolunteers
-        const response = await request()
-        console.log({ users: response.data })
+        const endpoint =
+          userType === "adopter" ? "/api/adopters/" : "/api/volunteers/"
+        const response = await axiosPrivate.get(endpoint)
         setAdopters(response.data)
       } catch (err) {
         setError("Error fetching adopters.")

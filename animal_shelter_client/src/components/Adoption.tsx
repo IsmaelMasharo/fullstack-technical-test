@@ -3,15 +3,15 @@ import {
   Paper,
   Title,
   Button,
-  Group,
   Loader,
   Card,
   Alert,
   Select,
 } from "@mantine/core"
-import { getAdoptions, updateAdoption } from "../api/shelter.api"
+import useAxiosPrivate from "../hooks/useAxiosPrivate"
 
 const AdoptionPage = () => {
+  const axiosPrivate = useAxiosPrivate()
   const [adoptions, setAdoptions] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -19,8 +19,7 @@ const AdoptionPage = () => {
   useEffect(() => {
     const fetchAdoptions = async () => {
       try {
-        const response = await getAdoptions()
-        console.log(response.data)
+        const response = await axiosPrivate.get("/api/adoptions/")
         setAdoptions(response.data)
       } catch (err) {
         setError(err.response.data.detail)
@@ -44,10 +43,13 @@ const AdoptionPage = () => {
 
   const handleUpdate = async (adoptionId, currentStatus) => {
     try {
-      const response = await updateAdoption(adoptionId, currentStatus)
-      console.log(response.data)
+      const response = await axiosPrivate.post(
+        `/api/adoptions/${adoptionId}/change_status/`,
+        {
+          status: currentStatus,
+        }
+      )
     } catch (err) {
-      console.error("Error updating status:", err)
       alert("Failed to update status.")
     }
   }

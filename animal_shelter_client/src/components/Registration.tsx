@@ -8,9 +8,11 @@ import {
   Paper,
   Button,
   Title,
-  Alert, Group, Anchor
+  Alert,
+  Group,
+  Anchor,
 } from "@mantine/core"
-import { createUser } from "../api/shelter.api"
+import axios from "../api/axios"
 
 const RegistrationForm = () => {
   const [error, setError] = useState(null)
@@ -52,8 +54,8 @@ const RegistrationForm = () => {
     }
 
     try {
-      const response = await createUser(payload)
-      navigate('/login')
+      await axios.post("/api/register/", payload)
+      navigate("/login")
     } catch (error) {
       if (error.response && error.response.status === 400) {
         setError("Email is already in use.")
@@ -155,8 +157,11 @@ const RegistrationForm = () => {
         </Button>
       </form>
 
-      <Group  mt="md">
-        <Anchor component="button" onClick={() => navigate('/login')}>
+      <Group mt="md">
+        <Anchor
+          component="button"
+          onClick={() => navigate("/login")}
+        >
           Have an account already? Log in
         </Anchor>
       </Group>

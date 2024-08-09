@@ -1,27 +1,53 @@
-import { Group, Anchor, Container } from '@mantine/core';
-import { useNavigate } from 'react-router-dom';
+import { Group, Anchor, Container } from "@mantine/core"
+import { useNavigate } from "react-router-dom"
+import useAuth from "../hooks/useAuth"
+import { ROLES } from "../helpers/constants"
 
+// ListAnimals Component
 const Header = () => {
-  const navigate = useNavigate();
+  const {
+    auth: { role },
+  } = useAuth()
+  const navigate = useNavigate()
 
   return (
-      <Container>
-        <Group >    
-          <Anchor component="button" onClick={() => navigate('/animals')} size="lg">
-            Animals
-          </Anchor>
-          <Anchor component="button" onClick={() => navigate('/adoptions')} size="lg">
-            Adoptions
-          </Anchor>
-          <Anchor component="button" onClick={() => navigate('/adopters')} size="lg">
+    <Container>
+      <Group>
+        <Anchor
+          component="button"
+          onClick={() => navigate("/animals")}
+          size="lg"
+        >
+          Animals
+        </Anchor>
+        <Anchor
+          component="button"
+          onClick={() => navigate("/adoptions")}
+          size="lg"
+        >
+          Adoptions
+        </Anchor>
+        {[ROLES.Admin, ROLES.Volunteer].includes(role) && (
+          <Anchor
+            component="button"
+            onClick={() => navigate("/adopters")}
+            size="lg"
+          >
             Adopters
           </Anchor>
-          <Anchor component="button" onClick={() => navigate('/volunteers')} size="lg">
+        )}
+        {role === ROLES.Admin && (
+          <Anchor
+            component="button"
+            onClick={() => navigate("/volunteers")}
+            size="lg"
+          >
             Volunteers
           </Anchor>
-        </Group>
-      </Container>
-  );
-};
+        )}
+      </Group>
+    </Container>
+  )
+}
 
-export default Header;
+export default Header
