@@ -4,6 +4,7 @@ from django.contrib.auth.models import AbstractUser
 
 class CustomUser(AbstractUser):
     TYPE_CHOICES = [
+        ("admin", "Administrador"),
         ("volunteer", "Voluntario"),
         ("adopter", "Adoptante"),
     ]

@@ -23,9 +23,9 @@ class AnimalSerializer(serializers.ModelSerializer):
 
 
 class AdoptionSerializer(serializers.ModelSerializer):
-    animal = AnimalSerializer()
-    volunteer = VolunteerSerializer()
-    adopter = AdopterSerializer()
+    animal = serializers.CharField(source="animal.name", read_only=True)
+    adopter = serializers.CharField(source="adopter.get_full_name", read_only=True)
+    volunteer = serializers.CharField(source="volunteer.get_full_name", read_only=True)
 
     class Meta:
         model = Adoption

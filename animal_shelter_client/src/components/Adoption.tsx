@@ -8,11 +8,22 @@ import {
   Alert,
   Select,
 } from "@mantine/core"
+import { isAxiosError } from "axios"
 import useAxiosPrivate from "../hooks/useAxiosPrivate"
+
+type AdoptionStatus = "pending_adoption" | "adopted"
+
+interface Adoption {
+  id: number
+  animal: string
+  adopter: string
+  volunteer: string
+  status: AdoptionStatus
+}
 
 const AdoptionPage = () => {
   const axiosPrivate = useAxiosPrivate()
-  const [adoptions, setAdoptions] = useState([])
+  const [adoptions, setAdoptions] = useState<Adoption[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -22,7 +33,9 @@ const AdoptionPage = () => {
         const response = await axiosPrivate.get("/api/adoptions/")
         setAdoptions(response.data)
       } catch (err) {
-        setError(err.response.data.detail)
+        if (isAxiosError(err)) {
+          setError(err.response?.data.detail)
+        }
       } finally {
         setLoading(false)
       }
@@ -31,20 +44,18 @@ const AdoptionPage = () => {
     fetchAdoptions()
   }, [])
 
-  const handleStatusChange = (adoptionId: number, newStatus) => {
+  const handleStatusChange = (adoptionId: number, status: AdoptionStatus) => {
     setAdoptions((prevAdoptions) =>
       prevAdoptions.map((adoption) =>
-        adoption.id === adoptionId
-          ? { ...adoption, status: newStatus }
-          : adoption
+        adoption.id === adoptionId ? { ...adoption, status } : adoption
       )
     )
   }
 
-  const handleUpdate = async (adoptionId: number, currentStatus) => {
+  const handleUpdate = async (adoptionId: number, status: AdoptionStatus) => {
     try {
       await axiosPrivate.post(`/api/adoptions/${adoptionId}/change_status/`, {
-        status: currentStatus,
+        status,
       })
     } catch (err) {
       alert("Failed to update status.")
@@ -73,13 +84,15 @@ const AdoptionPage = () => {
           shadow="sm"
           padding="lg"
         >
-          <p>Animal: {adoption.animal.name}</p>
-          <p>Adopter: {adoption.adopter.first_name}</p>
-          <p>Volunteer: {adoption.volunteer?.first_name}</p>
+          <p>Animal: {adoption.animal}</p>
+          <p>Adopter: {adoption.adopter}</p>
+          <p>Volunteer: {adoption.volunteer}</p>
           <Select
             label="State"
             value={adoption.status}
-            onChange={(newStatus) => handleStatusChange(adoption.id, newStatus)}
+            onChange={(status) =>
+              handleStatusChange(adoption.id, status as AdoptionStatus)
+            }
             data={[
               { value: "pending_adoption", label: "En proceso" },
               { value: "adopted", label: "Adoptado" },
