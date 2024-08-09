@@ -7,10 +7,13 @@ import {
   Loader,
   Card,
   Alert,
+  Select,
 } from "@mantine/core"
 import { isAxiosError } from "axios"
 import useAxiosPrivate from "../hooks/useAxiosPrivate"
 import useAuth from "../hooks/useAuth"
+import { Animals } from "../api/shelterApi"
+import { ROLES } from "../helpers/constants"
 
 interface Animal {
   id: number
@@ -21,7 +24,6 @@ interface Animal {
   status: string
 }
 
-// ListAnimals Component
 const ListAnimals = () => {
   const axiosPrivate = useAxiosPrivate()
   const {
@@ -35,13 +37,13 @@ const ListAnimals = () => {
   const fetchAnimals = async () => {
     try {
       const endpoint =
-        role === "adopter"
-          ? "/api/animals/available_for_adoption/"
-          : "/api/animals/"
+        role === ROLES.Adopter ? Animals.listAvailable : Animals.list
       const response = await axiosPrivate.get(endpoint)
       setAnimals(response.data)
     } catch (err) {
-      setError("Error fetching animals.")
+      if (isAxiosError(err)) {
+        setError(err.response?.data.detail)
+      }
     } finally {
       setLoading(false)
     }
@@ -52,7 +54,8 @@ const ListAnimals = () => {
 
   const handleRequestAdoption = async (animalId: number) => {
     try {
-      await axiosPrivate.post(`/api/animals/${animalId}/request_adoption/`)
+      const endpoint = Animals.requestAdoption(animalId)
+      await axiosPrivate.post(endpoint)
       fetchAnimals()
     } catch (err) {
       if (isAxiosError(err)) {
@@ -79,8 +82,16 @@ const ListAnimals = () => {
             mb="sm"
             disabled={true}
           />
-          <TextInput label="Type" value={animal.type} mb="sm" disabled={true} />
-          {role === "adopter" && (
+          <Select
+            label="Type"
+            disabled={true}
+            value={animal.type}
+            data={[
+              { value: "dog", label: "Dog" },
+              { value: "cat", label: "Cat" },
+            ]}
+          />
+          {role === ROLES.Adopter && (
             <Button mt="md" onClick={() => handleRequestAdoption(animal.id)}>
               Adopt
             </Button>

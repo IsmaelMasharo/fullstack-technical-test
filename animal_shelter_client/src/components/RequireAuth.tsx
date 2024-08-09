@@ -9,7 +9,7 @@ const RequireAuth: FC<{ allowedRoles: Role[] }> = ({ allowedRoles }) => {
 
   return auth.role && allowedRoles?.includes(auth.role) ? (
     <Outlet />
-  ) : auth ? (
+  ) : auth?.accessToken ? (
     <Navigate to="/unauthorized" state={{ from: location }} replace />
   ) : (
     <Navigate to="/login" state={{ from: location }} replace />

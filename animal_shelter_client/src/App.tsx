@@ -1,7 +1,7 @@
 import "@mantine/core/styles.css"
 import { MantineProvider } from "@mantine/core"
 import { Routes, Route, Outlet } from "react-router-dom"
-
+import { Container } from "@mantine/core"
 import LoginForm from "./components/Login"
 import RegistrationForm from "./components/Registration"
 import Animals from "./components/Animals"
@@ -12,7 +12,6 @@ import RequireAuth from "./components/RequireAuth"
 import Unauthorized from "./components/Unauthorized"
 import Missing from "./components/Missing"
 import PersistLogin from "./components/PersistLogin"
-import { Container } from "@mantine/core"
 
 function Layout() {
   return (

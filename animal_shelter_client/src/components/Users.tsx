@@ -2,6 +2,8 @@ import { useState, useEffect, FC } from "react"
 import { Paper, Title, TextInput, Loader, Card, Alert } from "@mantine/core"
 import useAxiosPrivate from "../hooks/useAxiosPrivate"
 import { Role } from "../context/AuthProvider"
+import { ROLES } from "../helpers/constants"
+import { Volunteers, Adopters } from "../api/shelterApi"
 
 interface User {
   id: number
@@ -13,27 +15,27 @@ interface User {
   status: string
 }
 
-const AdoptersPage: FC<{ role: Role }> = ({ role }) => {
+const UsersPage: FC<{ role: Role }> = ({ role }) => {
   const axiosPrivate = useAxiosPrivate()
-  const [adopters, setAdopters] = useState<User[]>([])
+  const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<null | string>(null)
 
   useEffect(() => {
-    const fetchAdopters = async () => {
+    const fetchUsers = async () => {
       try {
         const endpoint =
-          role === "adopter" ? "/api/adopters/" : "/api/volunteers/"
+          role === ROLES.Adopter ? Adopters.list : Volunteers.list
         const response = await axiosPrivate.get(endpoint)
-        setAdopters(response.data)
+        setUsers(response.data)
       } catch (err) {
-        setError("Error fetching adopters.")
+        setError("Error fetching users.")
       } finally {
         setLoading(false)
       }
     }
 
-    fetchAdopters()
+    fetchUsers()
   }, [role])
 
   if (loading) return <Loader size="lg" />
@@ -42,37 +44,32 @@ const AdoptersPage: FC<{ role: Role }> = ({ role }) => {
   return (
     <Paper p="sm">
       <Title order={2} mb="md">
-        {role === "adopter" ? "Adopters" : "Volunteers"}
+        {role === ROLES.Adopter ? "Adopters" : "Volunteers"}
       </Title>
-      {adopters.map((adopter) => (
-        <Card key={adopter.id} withBorder shadow="sm" px="xl" mb="md">
+      {users.map((user) => (
+        <Card key={user.id} withBorder shadow="sm" px="xl" mb="md">
           <TextInput
             label="Username"
-            value={adopter.username}
+            value={user.username}
             mb="sm"
             disabled={true}
           />
           <TextInput
             label="First Name"
-            value={adopter.first_name}
+            value={user.first_name}
             mb="sm"
             disabled={true}
           />
           <TextInput
             label="Last Name"
-            value={adopter.last_name}
+            value={user.last_name}
             mb="sm"
             disabled={true}
           />
-          <TextInput
-            label="Email"
-            value={adopter.email}
-            mb="sm"
-            disabled={true}
-          />
+          <TextInput label="Email" value={user.email} mb="sm" disabled={true} />
           <TextInput
             label="Status"
-            value={adopter.status}
+            value={user.status}
             mb="sm"
             disabled={true}
           />
@@ -82,4 +79,4 @@ const AdoptersPage: FC<{ role: Role }> = ({ role }) => {
   )
 }
 
-export default AdoptersPage
+export default UsersPage

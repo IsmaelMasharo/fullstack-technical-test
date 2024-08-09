@@ -1,15 +1,16 @@
-import { Group, Anchor, Container } from "@mantine/core"
+import { Group, Anchor, Container, Button } from "@mantine/core"
 import { useNavigate } from "react-router-dom"
-import useAuth from "../hooks/useAuth"
-import { ROLES } from "../helpers/constants"
 import classes from "../styles/Header.module.css"
+import useAuth from "../hooks/useAuth"
+import useLogout from "../hooks/useLogout"
+import { ROLES } from "../helpers/constants"
 
-// ListAnimals Component
 const Header = () => {
   const {
     auth: { role },
   } = useAuth()
   const navigate = useNavigate()
+  const logout = useLogout()
 
   return (
     <header className={classes.header}>
@@ -52,6 +53,7 @@ const Header = () => {
             </Anchor>
           )}
         </Group>
+        <Button onClick={logout}>Log Out</Button>
       </Container>
     </header>
   )

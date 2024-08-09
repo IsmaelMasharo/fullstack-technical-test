@@ -45,7 +45,7 @@ const LoginForm = () => {
     }
 
     try {
-      const response = await axios.post("/api/auth/token/", payload, {
+      const response = await axios.post("/api/auth/login/", payload, {
         withCredentials: true,
       })
       const { access, user_type } = response?.data

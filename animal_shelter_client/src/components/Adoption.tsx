@@ -11,7 +11,7 @@ import {
 } from "@mantine/core"
 import { isAxiosError } from "axios"
 import useAxiosPrivate from "../hooks/useAxiosPrivate"
-import useAuth from "../hooks/useAuth"
+import { Adoptions } from "../api/shelterApi"
 
 type AdoptionStatus = "pending_adoption" | "adopted"
 
@@ -28,14 +28,13 @@ const AdoptionPage = () => {
   const [adoptions, setAdoptions] = useState<Adoption[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const { auth } = useAuth()
 
   useEffect(() => {
     const fetchAdoptions = async () => {
       try {
-        const response = await axiosPrivate.get("/api/adoptions/")
+        const endpoint = Adoptions.list
+        const response = await axiosPrivate.get(endpoint)
         setAdoptions(response.data)
-        console.log(response.data)
       } catch (err) {
         if (isAxiosError(err)) {
           setError(err.response?.data.detail)
@@ -58,9 +57,9 @@ const AdoptionPage = () => {
 
   const handleUpdate = async (adoptionId: number, status: AdoptionStatus) => {
     try {
-      await axiosPrivate.post(`/api/adoptions/${adoptionId}/change_status/`, {
-        status,
-      })
+      const endpoint = Adoptions.changeStatus(adoptionId)
+      await axiosPrivate.post(endpoint, { status })
+      alert("Status successfully updated.")
     } catch (err) {
       alert("Failed to update status.")
     }
@@ -96,8 +95,8 @@ const AdoptionPage = () => {
               handleStatusChange(adoption.id, status as AdoptionStatus)
             }
             data={[
-              { value: "pending_adoption", label: "En proceso" },
-              { value: "adopted", label: "Adoptado" },
+              { value: "pending_adoption", label: "Pending" },
+              { value: "adopted", label: "Adopted" },
             ]}
           />
           <Button
