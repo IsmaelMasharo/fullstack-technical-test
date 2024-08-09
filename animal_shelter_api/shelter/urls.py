@@ -7,6 +7,8 @@ from .views import (
     AnimalViewSet,
     AdoptionViewSet,
     RegisterView,
+    CookieTokenRefreshView,
+    CookieTokenObtainPairView,
 )
 
 router = DefaultRouter()
@@ -18,4 +20,6 @@ router.register(r"adoptions", AdoptionViewSet)
 urlpatterns = [
     path("", include(router.urls)),
     path("register/", RegisterView.as_view(), name="register"),
+    path("auth/token/", CookieTokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("auth/token/refresh/", CookieTokenRefreshView.as_view(), name="token_refresh"),
 ]

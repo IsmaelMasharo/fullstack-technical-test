@@ -1,9 +1,14 @@
 from rest_framework import viewsets, status, generics
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
+from rest_framework_simplejwt.exceptions import InvalidToken
+from rest_framework_simplejwt.serializers import (
+    TokenRefreshSerializer,
+    TokenObtainPairSerializer,
+)
 from rest_framework.permissions import BasePermission, AllowAny, IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.contrib.auth.models import update_last_login
 from .models import CustomUser, Animal, Adoption
 from .serializers import (
     VolunteerSerializer,
@@ -12,6 +17,69 @@ from .serializers import (
     AdoptionSerializer,
     RegisterSerializer,
 )
+
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        data["user_type"] = self.user.user_type
+        return data
+
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        # Add custom claims
+        token["usertype"] = user.user_type
+
+        return token
+
+
+class CookieTokenRefreshSerializer(TokenRefreshSerializer):
+    refresh = None
+
+    def validate(self, attrs):
+        attrs["refresh"] = self.context["request"].COOKIES.get("refresh_token")
+        if attrs["refresh"]:
+            return super().validate(attrs)
+        else:
+            raise InvalidToken("No valid token found in cookie 'refresh_token'")
+
+
+class CookieTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
+
+    def finalize_response(self, request, response, *args, **kwargs):
+        if response.data.get("refresh"):
+            cookie_max_age = 3600 * 24 * 14  # 14 days
+            response.set_cookie(
+                key="refresh_token",
+                value=response.data["refresh"],
+                max_age=cookie_max_age,
+                httponly=True,
+                samesite="Lax",
+                secure=False,
+            )
+            del response.data["refresh"]
+        return super().finalize_response(request, response, *args, **kwargs)
+
+
+class CookieTokenRefreshView(TokenRefreshView):
+    def finalize_response(self, request, response, *args, **kwargs):
+        if response.data.get("refresh"):
+            cookie_max_age = 3600 * 24 * 14  # 14 days
+            response.set_cookie(
+                key="refresh_token",
+                value=response.data["refresh"],
+                max_age=cookie_max_age,
+                httponly=True,
+                samesite="Lax",
+                secure=False,
+            )
+            del response.data["refresh"]
+        return super().finalize_response(request, response, *args, **kwargs)
+
+    serializer_class = CookieTokenRefreshSerializer
 
 
 class IsAdminOrReadOnly(BasePermission):
@@ -25,7 +93,6 @@ class IsAdminOrReadOnly(BasePermission):
 
 class IsVolunteerOrReadOnly(BasePermission):
     def has_permission(self, request, view):
-        print(request.user)
         return (
             request.user
             and request.user.is_authenticated
@@ -115,7 +182,6 @@ class AdoptionViewSet(viewsets.ModelViewSet):
         status = request.data.get("status")
         manager = request.user
         animal = adoption.animal
-        print(animal, manager, status, adoption)
         if status not in ["pending_adoption", "adopted"]:
             return Response(
                 {"status": "invalid status"}, status=status.HTTP_400_BAD_REQUEST
