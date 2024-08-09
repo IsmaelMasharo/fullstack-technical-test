@@ -1,11 +1,13 @@
 from rest_framework import viewsets, status, generics
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
 from rest_framework_simplejwt.exceptions import InvalidToken
 from rest_framework_simplejwt.serializers import (
     TokenRefreshSerializer,
     TokenObtainPairSerializer,
 )
+from django.contrib.auth import get_user_model
 from rest_framework.permissions import BasePermission, AllowAny, IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -17,6 +19,8 @@ from .serializers import (
     AdoptionSerializer,
     RegisterSerializer,
 )
+
+User = get_user_model()
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -41,7 +45,14 @@ class CookieTokenRefreshSerializer(TokenRefreshSerializer):
     def validate(self, attrs):
         attrs["refresh"] = self.context["request"].COOKIES.get("refresh_token")
         if attrs["refresh"]:
-            return super().validate(attrs)
+            data = super().validate(attrs)
+
+            refresh = RefreshToken(attrs["refresh"])
+            user_id = refresh["user_id"]
+            user = User.objects.get(id=user_id)
+            data["user_type"] = user.user_type
+
+            return data
         else:
             raise InvalidToken("No valid token found in cookie 'refresh_token'")
 
