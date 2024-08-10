@@ -1,103 +1,72 @@
 import { useState, useEffect } from "react"
-import {
-  Paper,
-  Title,
-  Button,
-  TextInput,
-  Loader,
-  Card,
-  Alert,
-  Select,
-} from "@mantine/core"
+import { Paper, Title, Alert, Table, Group, Button } from "@mantine/core"
+import { Link, useNavigate } from "react-router-dom"
 import { isAxiosError } from "axios"
 import useAxiosPrivate from "../hooks/useAxiosPrivate"
 import useAuth from "../hooks/useAuth"
 import { Animals } from "../api/shelterApi"
 import { ROLES } from "../helpers/constants"
-
-interface Animal {
-  id: number
-  name: string
-  age: number
-  breed: string
-  type: string
-  status: string
-}
+import { Animal } from "./AnimalForm"
 
 const ListAnimals = () => {
   const axiosPrivate = useAxiosPrivate()
-  const {
-    auth: { role },
-  } = useAuth()
-
+  const { auth } = useAuth()
   const [animals, setAnimals] = useState<Animal[]>([])
-  const [loading, setLoading] = useState(true)
   const [error, setError] = useState<null | string>(null)
+  const navigate = useNavigate()
 
-  const fetchAnimals = async () => {
-    try {
-      const endpoint =
-        role === ROLES.Adopter ? Animals.listAvailable : Animals.list
-      const response = await axiosPrivate.get(endpoint)
-      setAnimals(response.data)
-    } catch (err) {
-      if (isAxiosError(err)) {
-        setError(err.response?.data.detail)
-      }
-    } finally {
-      setLoading(false)
-    }
-  }
   useEffect(() => {
+    const fetchAnimals = async () => {
+      try {
+        const endpoint =
+          auth.role === ROLES.Adopter ? Animals.listAvailable : Animals.list
+        const response = await axiosPrivate.get(endpoint)
+        setAnimals(response.data)
+      } catch (err) {
+        if (isAxiosError(err)) {
+          setError(err.response?.data.detail)
+        }
+      }
+    }
     fetchAnimals()
   }, [])
 
-  const handleRequestAdoption = async (animalId: number) => {
-    try {
-      const endpoint = Animals.requestAdoption(animalId)
-      await axiosPrivate.post(endpoint)
-      fetchAnimals()
-    } catch (err) {
-      if (isAxiosError(err)) {
-        alert(err.response?.data.detail)
-      }
-    }
-  }
-
-  if (loading) return <Loader size="lg" />
   if (error) return <Alert color="red">{error}</Alert>
 
   return (
     <Paper p="sm">
-      <Title order={2} mb="md">
-        Animals
-      </Title>
-      {animals.map((animal) => (
-        <Card key={animal.id} withBorder shadow="sm" px="xl" mb="md">
-          <TextInput label="Name" value={animal.name} mb="sm" disabled={true} />
-          <TextInput label="Age" value={animal.age} mb="sm" disabled={true} />
-          <TextInput
-            label="Breed"
-            value={animal.breed}
-            mb="sm"
-            disabled={true}
-          />
-          <Select
-            label="Type"
-            disabled={true}
-            value={animal.type}
-            data={[
-              { value: "dog", label: "Dog" },
-              { value: "cat", label: "Cat" },
-            ]}
-          />
-          {role === ROLES.Adopter && (
-            <Button mt="md" onClick={() => handleRequestAdoption(animal.id)}>
-              Adopt
-            </Button>
-          )}
-        </Card>
-      ))}
+      <Group mb="md" justify="space-between">
+        <Title order={2}>Animals</Title>
+        {auth.role === ROLES.Admin && (
+          <Button onClick={() => navigate("/animals/create")}>
+            New Animal
+          </Button>
+        )}
+      </Group>
+      <Table.ScrollContainer minWidth={800}>
+        <Table miw={700}>
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th>Name</Table.Th>
+              <Table.Th>Age</Table.Th>
+              <Table.Th>Breed</Table.Th>
+              <Table.Th>Type</Table.Th>
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>
+            {animals.map((animal) => (
+              <Table.Tr key={animal.id}>
+                <Table.Td>
+                  <Link to={`/animal/${animal.id}`}>{animal.name}</Link>
+                </Table.Td>
+                <Table.Td>{animal.age}</Table.Td>
+                <Table.Td>{animal.breed}</Table.Td>
+                <Table.Td>{animal.type}</Table.Td>
+              </Table.Tr>
+            ))}
+          </Table.Tbody>
+        </Table>
+      </Table.ScrollContainer>
     </Paper>
   )
 }

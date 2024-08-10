@@ -2,13 +2,13 @@ from rest_framework import viewsets, status, generics
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import CustomUser, Animal, Adoption
 from .permissions import IsAdminOrReadOnly, IsAdopterOrReadOnly, IsVolunteerOrAdmin
 from .serializers import (
-    VolunteerSerializer,
-    AdopterSerializer,
+    CustomUserSerializer,
     AnimalSerializer,
     AdoptionSerializer,
     RegisterSerializer,
@@ -17,13 +17,13 @@ from .serializers import (
 
 class VolunteerViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.filter(user_type="volunteer")
-    serializer_class = VolunteerSerializer
+    serializer_class = CustomUserSerializer
     permission_classes = [IsAdminOrReadOnly]
 
 
 class AdopterViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.filter(user_type="adopter")
-    serializer_class = AdopterSerializer
+    serializer_class = CustomUserSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsVolunteerOrAdmin]
 
@@ -65,7 +65,15 @@ class AnimalViewSet(viewsets.ModelViewSet):
 class AdoptionViewSet(viewsets.ModelViewSet):
     queryset = Adoption.objects.all()
     serializer_class = AdoptionSerializer
-    permission_classes = [IsVolunteerOrAdmin]
+    permission_classes = [IsAuthenticated]
+
+    def retrieve(self, request, *args, **kwargs):
+        print("entraaa")
+        instance = self.get_object()
+        if not request.user.is_staff and instance.adopter != request.user:
+            raise PermissionDenied("You do not have permission to view this adoption.")
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
     @action(detail=True, methods=["post"])
     def change_status(self, request, pk=None):
@@ -85,6 +93,18 @@ class AdoptionViewSet(viewsets.ModelViewSet):
         animal.status = status
         animal.save()
         return Response({"status": "adoption updated"})
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="user/requests",
+        permission_classes=[IsAdopterOrReadOnly],
+    )
+    def user_requests(self, request):
+        user = request.user
+        user_adoptions = self.queryset.filter(adopter=user)
+        serializer = self.get_serializer(user_adoptions, many=True)
+        return Response(serializer.data)
 
 
 class RegisterView(generics.CreateAPIView):

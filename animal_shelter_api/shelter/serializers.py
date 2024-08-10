@@ -2,18 +2,18 @@ from rest_framework import serializers
 from .models import CustomUser, Animal, Adoption
 
 
-class VolunteerSerializer(serializers.ModelSerializer):
+class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ["id", "username", "first_name", "last_name", "email", "status"]
-        extra_kwargs = {"user_type": {"read_only": True}}
-
-
-class AdopterSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomUser
-        fields = ["id", "username", "first_name", "last_name", "email", "status"]
-        extra_kwargs = {"user_type": {"read_only": True}}
+        fields = [
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "email",
+            "status",
+            "user_type",
+        ]
 
 
 class AnimalSerializer(serializers.ModelSerializer):
