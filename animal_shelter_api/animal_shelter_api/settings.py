@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-&h@dzq1fv1pw1mvr)$+&7zqf*7fgejyjat(k65a%_)i)%c)z5q
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1", ".vercel.app"]
 
 
 # Application definition
@@ -75,7 +75,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "animal_shelter_api.wsgi.application"
+WSGI_APPLICATION = "animal_shelter_api.wsgi.app"
 
 
 # Database
