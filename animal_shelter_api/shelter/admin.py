@@ -14,9 +14,20 @@ class AnimalAdmin(admin.ModelAdmin):
 
 @admin.register(CustomUser)
 class UserAdmin(admin.ModelAdmin):
-    pass
+    list_display = (
+        "id",
+        "username",
+        "user_type",
+        "status",
+    )
 
 
 @admin.register(Adoption)
 class AdoptionAdmin(admin.ModelAdmin):
-    pass
+    list_display = (
+        "id",
+        "animal__name",
+        "volunteer",
+        "adopter",
+        "status",
+    )

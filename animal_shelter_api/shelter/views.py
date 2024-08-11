@@ -1,12 +1,15 @@
 from rest_framework import viewsets, status, generics
-from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import CustomUser, Animal, Adoption
-from .permissions import IsAdminOrReadOnly, IsAdopterOrReadOnly, IsVolunteerOrAdmin
+from .permissions import (
+    IsAdopter,
+    IsAdminOrReadOnly,
+    IsVolunteerOrAdmin,
+    IsAdminOrReadOnlyVolunteer,
+)
 from .serializers import (
     CustomUserSerializer,
     AnimalSerializer,
@@ -16,95 +19,54 @@ from .serializers import (
 
 
 class VolunteerViewSet(viewsets.ModelViewSet):
-    queryset = CustomUser.objects.filter(user_type="volunteer")
+    queryset = CustomUser.objects.filter(user_type=CustomUser.VOLUNTEER)
     serializer_class = CustomUserSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [IsAdminUser]
 
 
 class AdopterViewSet(viewsets.ModelViewSet):
-    queryset = CustomUser.objects.filter(user_type="adopter")
+    queryset = CustomUser.objects.filter(user_type=CustomUser.ADOPTER)
     serializer_class = CustomUserSerializer
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsVolunteerOrAdmin]
+    permission_classes = [IsAdminOrReadOnlyVolunteer]
 
 
 class AnimalViewSet(viewsets.ModelViewSet):
     queryset = Animal.objects.all()
     serializer_class = AnimalSerializer
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminOrReadOnly]
+    filterset_fields = ["status"]
 
-    @action(detail=False, methods=["get"], permission_classes=[IsAdopterOrReadOnly])
-    def available_for_adoption(self, request):
-        animals = Animal.objects.filter(status="awaiting_adoption")
-        serializer = self.get_serializer(animals, many=True)
-        return Response(serializer.data)
-
-    @action(detail=True, methods=["post"], permission_classes=[IsAdopterOrReadOnly])
+    @action(detail=True, methods=["post"], permission_classes=[IsAdopter])
     def request_adoption(self, request, pk=None):
         animal = self.get_object()
-        if animal.status == "awaiting_adoption":
-            adoption = Adoption(
-                animal=animal,
-                adopter=request.user,
-                volunteer=None,
-                status="pending_adoption",
-            )
-            adoption.save()
-            animal.status = "pending_adoption"
+        if animal.status == Animal.AWAITING:
+            Adoption.objects.create(animal=animal, adopter=request.user)
+            animal.status = Animal.PENDING
             animal.save()
-            return Response(
-                {"status": "adoption requested"}, status=status.HTTP_201_CREATED
-            )
-        return Response(
-            {"status": "animal not available for adoption"},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
+            return Response(status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class AdoptionViewSet(viewsets.ModelViewSet):
     queryset = Adoption.objects.all()
     serializer_class = AdoptionSerializer
-    permission_classes = [IsAuthenticated]
-
-    def retrieve(self, request, *args, **kwargs):
-        print("entraaa")
-        instance = self.get_object()
-        if not request.user.is_staff and instance.adopter != request.user:
-            raise PermissionDenied("You do not have permission to view this adoption.")
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
-
-    @action(detail=True, methods=["post"])
-    def change_status(self, request, pk=None):
-        adoption = self.get_object()
-        status = request.data.get("status")
-        manager = request.user
-        animal = adoption.animal
-        if status not in ["pending_adoption", "adopted"]:
-            return Response(
-                {"status": "invalid status"}, status=status.HTTP_400_BAD_REQUEST
-            )
-
-        adoption.status = status
-        adoption.volunteer = manager
-        adoption.save()
-
-        animal.status = status
-        animal.save()
-        return Response({"status": "adoption updated"})
+    permission_classes = [IsAdminOrReadOnlyVolunteer]
 
     @action(
-        detail=False,
-        methods=["get"],
-        url_path="user/requests",
-        permission_classes=[IsAdopterOrReadOnly],
+        detail=True,
+        methods=["patch"],
+        url_path="status",
+        permission_classes=[IsVolunteerOrAdmin],
     )
-    def user_requests(self, request):
-        user = request.user
-        user_adoptions = self.queryset.filter(adopter=user)
-        serializer = self.get_serializer(user_adoptions, many=True)
-        return Response(serializer.data)
+    def update_status(self, request, pk=None):
+        adoption = self.get_object()
+        new_status = request.data.get("status")
+        adoption.status = new_status
+        adoption.volunteer = request.user
+        adoption.save()
+        adoption.animal.status = new_status
+        adoption.animal.save()
+        return Response(status=status.HTTP_200_OK)
 
 
 class RegisterView(generics.CreateAPIView):
@@ -114,8 +76,7 @@ class RegisterView(generics.CreateAPIView):
 
 
 class LogoutView(generics.GenericAPIView):
-    permission_classes = (IsAuthenticated,)
-    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         try:

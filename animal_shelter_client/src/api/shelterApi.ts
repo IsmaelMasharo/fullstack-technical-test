@@ -4,7 +4,6 @@ export const Animals = {
   delete: (animalId: string) => `/api/animals/${animalId}/`,
   create: "/api/animals/",
   list: "/api/animals/",
-  listAvailable: "/api/animals/available_for_adoption/",
   requestAdoption: (animalId: string) =>
     `/api/animals/${animalId}/request_adoption/`,
 }
@@ -12,9 +11,10 @@ export const Animals = {
 export const Adoptions = {
   get: (adoptionId: string) => `/api/adoptions/${adoptionId}/`,
   list: "/api/adoptions/",
-  changeStatus: (adoptionId: string) =>
-    `/api/adoptions/${adoptionId}/change_status/`,
-  userRequests: "/api/adoptions/user/requests/",
+  create: "/api/adoptions/",
+  update: (adoptionId: string) => `/api/adoptions/${adoptionId}/`,
+  delete: (adoptionId: string) => `/api/adoptions/${adoptionId}/`,
+  updateStatus: (adoptionId: string) => `/api/adoptions/${adoptionId}/status/`,
 }
 
 export const Volunteers = {

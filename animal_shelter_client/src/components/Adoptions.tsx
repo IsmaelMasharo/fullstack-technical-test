@@ -1,24 +1,24 @@
 import { useState, useEffect } from "react"
-import { Paper, Title, Alert, Table } from "@mantine/core"
-import { Link } from "react-router-dom"
+import { Paper, Title, Alert, Table, Group, Button } from "@mantine/core"
+import { Link, useNavigate } from "react-router-dom"
 import { isAxiosError } from "axios"
 import useAxiosPrivate from "../hooks/useAxiosPrivate"
 import { Adoptions } from "../api/shelterApi"
-import { ROLES } from "../helpers/constants"
 import { Adoption } from "./AdoptionForm"
 import useAuth from "../hooks/useAuth"
+import { ROLES } from "../helpers/constants"
 
 const AdoptionPage = () => {
   const axiosPrivate = useAxiosPrivate()
   const [adoptions, setAdoptions] = useState<Adoption[]>([])
   const [error, setError] = useState(null)
   const { auth } = useAuth()
+  const navigate = useNavigate()
 
   useEffect(() => {
     const fetchAdoptions = async () => {
       try {
-        const endpoint =
-          auth.role === ROLES.Adopter ? Adoptions.userRequests : Adoptions.list
+        const endpoint = Adoptions.list
         const response = await axiosPrivate.get(endpoint)
         setAdoptions(response.data)
       } catch (err) {
@@ -35,9 +35,14 @@ const AdoptionPage = () => {
 
   return (
     <Paper p="sm">
-      <Title order={2} mb="md">
-        Adoptions
-      </Title>
+      <Group mb="md" justify="space-between">
+        <Title order={2}>Adoptions</Title>
+        {auth.role === ROLES.Admin && (
+          <Button onClick={() => navigate("/adoptions/create")}>
+            New Adoption
+          </Button>
+        )}
+      </Group>
       <Table.ScrollContainer minWidth={800}>
         <Table miw={700}>
           <Table.Thead>

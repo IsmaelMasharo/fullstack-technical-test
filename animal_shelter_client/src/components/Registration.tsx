@@ -15,6 +15,8 @@ import {
 import { isAxiosError } from "axios"
 import axios from "../api/axios"
 
+type AdopterOrVolunteer = "adopter" | "volunteer"
+
 interface FormValues {
   username: string
   email: string
@@ -22,7 +24,7 @@ interface FormValues {
   lastName: string
   password: string
   confirmPassword: string
-  userType: string
+  userType: AdopterOrVolunteer
 }
 
 const RegistrationForm = () => {
@@ -37,20 +39,16 @@ const RegistrationForm = () => {
       lastName: "",
       password: "",
       confirmPassword: "",
-      userType: "",
+      userType: "adopter",
     },
 
     validate: {
       username: (value) => (value.length > 0 ? null : "Username is required"),
       email: (value) => (/^\S+@\S+$/.test(value) ? null : "Invalid email"),
-      firstName: (value) =>
-        value.length > 0 ? null : "First name is required",
-      lastName: (value) => (value.length > 0 ? null : "Last name is required"),
       password: (value) =>
         value.length >= 6 ? null : "Password must be at least 6 characters",
       confirmPassword: (value, values) =>
         value === values.password ? null : "Passwords do not match",
-      userType: (value) => (value ? null : "User type is required"),
     },
   })
 
@@ -66,6 +64,7 @@ const RegistrationForm = () => {
 
     try {
       await axios.post("/api/register/", payload)
+      alert("Registration successful. Please log in.")
       navigate("/login")
     } catch (error) {
       if (isAxiosError(error)) {

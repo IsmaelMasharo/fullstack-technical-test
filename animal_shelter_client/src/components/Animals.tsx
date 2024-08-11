@@ -18,9 +18,10 @@ const ListAnimals = () => {
   useEffect(() => {
     const fetchAnimals = async () => {
       try {
-        const endpoint =
-          auth.role === ROLES.Adopter ? Animals.listAvailable : Animals.list
-        const response = await axiosPrivate.get(endpoint)
+        const endpoint = Animals.list
+        const params =
+          auth.role === ROLES.Adopter ? { status: "awaiting_adoption" } : {}
+        const response = await axiosPrivate.get(endpoint, { params })
         setAnimals(response.data)
       } catch (err) {
         if (isAxiosError(err)) {

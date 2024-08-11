@@ -24,23 +24,25 @@ const Header = () => {
           >
             Animals
           </Anchor>
-          <Anchor
-            component="button"
-            onClick={() => navigate("/adoptions")}
-            size="lg"
-            className={classes.link}
-          >
-            Adoptions
-          </Anchor>
           {role && [ROLES.Admin, ROLES.Volunteer].includes(role) && (
-            <Anchor
-              component="button"
-              onClick={() => navigate("/adopters")}
-              size="lg"
-              className={classes.link}
-            >
-              Adopters
-            </Anchor>
+            <>
+              <Anchor
+                component="button"
+                onClick={() => navigate("/adoptions")}
+                size="lg"
+                className={classes.link}
+              >
+                Adoptions
+              </Anchor>
+              <Anchor
+                component="button"
+                onClick={() => navigate("/adopters")}
+                size="lg"
+                className={classes.link}
+              >
+                Adopters
+              </Anchor>
+            </>
           )}
           {role === ROLES.Admin && (
             <Anchor

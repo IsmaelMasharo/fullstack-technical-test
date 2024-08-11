@@ -45,20 +45,21 @@ export default function App() {
               <Route path="/animals" element={<Animals />} />
               <Route path="/animals/create" element={<AnimalForm />} />
               <Route path="/animal/:id" element={<AnimalForm />} />
-              <Route path="/adoptions" element={<Adoptions />} />
-              <Route path="/adoptions/:id" element={<AdoptionForm />} />
             </Route>
 
             <Route
               element={<RequireAuth allowedRoles={["admin", "volunteer"]} />}
             >
+              <Route path="/adoptions" element={<Adoptions />} />
+              <Route path="/adoptions/create" element={<AdoptionForm />} />
+              <Route path="/adoptions/:id" element={<AdoptionForm />} />
               <Route path="/adopters" element={<Users role="adopter" />} />
               <Route path="/users/:id" element={<UserForm />} />
-              <Route path="/users/create" element={<UserForm />} />
             </Route>
 
             <Route element={<RequireAuth allowedRoles={["admin"]} />}>
               <Route path="/volunteers" element={<Users role="volunteer" />} />
+              <Route path="/users/create" element={<UserForm />} />
             </Route>
           </Route>
         </Route>

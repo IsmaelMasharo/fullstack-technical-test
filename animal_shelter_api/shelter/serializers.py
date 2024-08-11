@@ -23,9 +23,16 @@ class AnimalSerializer(serializers.ModelSerializer):
 
 
 class AdoptionSerializer(serializers.ModelSerializer):
+    adopter_queryset = CustomUser.objects.filter(user_type=CustomUser.ADOPTER)
+    volunteer_queryset = CustomUser.objects.filter(user_type=CustomUser.VOLUNTEER)
     animal = serializers.CharField(source="animal.name", read_only=True)
-    adopter = serializers.CharField(source="adopter.get_full_name", read_only=True)
-    volunteer = serializers.CharField(source="volunteer.get_full_name", read_only=True)
+    adopter = serializers.CharField(source="adopter.username", read_only=True)
+    volunteer = serializers.CharField(source="volunteer.username", read_only=True)
+    animal_id = serializers.PrimaryKeyRelatedField(queryset=Animal.objects.all())
+    adopter_id = serializers.PrimaryKeyRelatedField(queryset=adopter_queryset)
+    volunteer_id = serializers.PrimaryKeyRelatedField(
+        queryset=volunteer_queryset, allow_null=True
+    )
 
     class Meta:
         model = Adoption
@@ -37,7 +44,29 @@ class AdoptionSerializer(serializers.ModelSerializer):
             "volunteer",
             "adopter",
             "status",
+            "adopter_id",
+            "volunteer_id",
+            "animal_id",
         ]
+
+    def custom_fk_parsing(self, instance, validated_data):
+        instance.animal = validated_data.pop("animal_id")
+        instance.volunteer = validated_data.pop("volunteer_id")
+        instance.adopter = validated_data.pop("adopter_id")
+        return instance
+
+    def update(self, instance, validated_data):
+        instance.animal = validated_data.pop("animal_id")
+        instance.volunteer = validated_data.pop("volunteer_id")
+        instance.adopter = validated_data.pop("adopter_id")
+        return super().update(instance, validated_data)
+
+    def create(self, validated_data):
+        validated_data["animal_id"] = validated_data.pop("animal_id").id
+        validated_data["adopter_id"] = validated_data.pop("adopter_id").id
+        if validated_data["volunteer_id"]:
+            validated_data["volunteer_id"] = validated_data.pop("volunteer_id").id
+        return super().create(validated_data)
 
 
 class RegisterSerializer(serializers.ModelSerializer):
