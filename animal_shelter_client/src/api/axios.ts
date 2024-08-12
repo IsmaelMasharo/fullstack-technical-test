@@ -4,6 +4,7 @@ const BASE_URL =
     ? process.env.REACT_LOCAL_API
     : process.env.REACT_PROD_API
 
+console.log({ BASE_URL })
 export default axios.create({
   baseURL: BASE_URL,
 })
