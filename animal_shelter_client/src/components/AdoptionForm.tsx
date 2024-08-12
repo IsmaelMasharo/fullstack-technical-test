@@ -69,6 +69,8 @@ const Adoption = () => {
           volunteer_id: response.data.volunteer_id?.toString(),
         }
         form.setValues(formData)
+        setAnimals([{ value: formData.animal_id, label: formData.animal }])
+        setAdopters([{ value: formData.adopter_id, label: formData.adopter }])
       } catch (err) {
         if (isAxiosError(err)) {
           setError(err.response?.data.detail)
@@ -182,14 +184,16 @@ const Adoption = () => {
           {...form.getInputProps("adopter_id")}
           data={adopters}
         />
-        <Select
-          label="Volunteer"
-          mb="sm"
-          required
-          readOnly={!isAdmin}
-          {...form.getInputProps("volunteer_id")}
-          data={volunteers}
-        />
+        {isAdmin && (
+          <Select
+            label="Volunteer"
+            mb="sm"
+            required
+            readOnly={!isAdmin}
+            {...form.getInputProps("volunteer_id")}
+            data={volunteers}
+          />
+        )}
         <Select
           label="Status"
           required
