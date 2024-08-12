@@ -1,6 +1,6 @@
 import "@mantine/core/styles.css"
 import { MantineProvider } from "@mantine/core"
-import { Routes, Route, Outlet } from "react-router-dom"
+import { Routes, Route, Outlet, Navigate } from "react-router-dom"
 import { Container } from "@mantine/core"
 import LoginForm from "./components/Login"
 import RegistrationForm from "./components/Registration"
@@ -31,12 +31,13 @@ export default function App() {
   return (
     <MantineProvider>
       <Routes>
+        <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="login" element={<LoginForm />} />
         <Route path="register" element={<RegistrationForm />} />
         <Route path="unauthorized" element={<Unauthorized />} />
 
         <Route element={<PersistLogin />}>
-          <Route path="/" element={<Layout />}>
+          <Route element={<Layout />}>
             <Route
               element={
                 <RequireAuth allowedRoles={["admin", "adopter", "volunteer"]} />
