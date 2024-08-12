@@ -158,7 +158,7 @@ const Animal = () => {
             Request Adoption
           </Button>
         )}
-        {auth.role === ROLES.Admin ? (
+        {isAdmin ? (
           id === undefined ? (
             <Button mt="md" onClick={() => createAnimal()}>
               Create

@@ -148,7 +148,7 @@ const User = () => {
             { value: "inactive", label: "Inactive" },
           ]}
         />
-        {auth.role === ROLES.Admin ? (
+        {isAdmin ? (
           id === undefined ? (
             <Button mt="md" onClick={() => createUser()}>
               Create
