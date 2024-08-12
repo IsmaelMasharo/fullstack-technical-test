@@ -30,8 +30,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG")
 
-ALLOWED_HOSTS = ["127.0.0.1", ".vercel.app"]
-
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS").split(",")
 
 # Application definition
 
@@ -85,17 +84,25 @@ WSGI_APPLICATION = "animal_shelter_api.wsgi.app"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": os.environ.get("POSTGRES_DATABASE"),
-        "USER": os.environ.get("POSTGRES_USER"),
-        "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),
-        "HOST": os.environ.get("POSTGRES_HOST"),
-        "PORT": os.environ.get("POSTGRES_PORT"),
-    }
+LOCAL_DB_CONFIG = {
+    "ENGINE": "django.db.backends.sqlite3",
+    "NAME": BASE_DIR / "db.sqlite3",
 }
 
+PROD_DB_CONFIG = {
+    "ENGINE": "django.db.backends.postgresql_psycopg2",
+    "NAME": os.environ.get("POSTGRES_DATABASE"),
+    "USER": os.environ.get("POSTGRES_USER"),
+    "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),
+    "HOST": os.environ.get("POSTGRES_HOST"),
+    "PORT": os.environ.get("POSTGRES_PORT"),
+}
+
+DATABASES = {
+    "default": (
+        LOCAL_DB_CONFIG if os.environ.get("ENVIRONMENT") == "local" else PROD_DB_CONFIG
+    )
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -141,11 +148,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles_build", "static")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # cors authorization
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "https://animal-shelter-client.vercel.app",
-]
+CORS_ALLOWED_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS").split(",")
 
 # for token cookie httonly
 CORS_ALLOW_CREDENTIALS = True
